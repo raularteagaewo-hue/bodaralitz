@@ -99,7 +99,7 @@ section.show {
 .hero {
   background:
     linear-gradient(rgba(245,239,230,0.4), rgba(245,239,230,0.4)),
-    url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80');
+    url('./base.jpg');
   background-size: cover;
   background-position: center;
 }
@@ -139,9 +139,9 @@ section.show {
 .slider img {
   width: 85%;
   height: 220px;        /* altura fija */
-  object-fit: cover;    /* evita deformación */
+  object-fit: contain;    /* evita deformación */
   border-radius: 10px;
-  flex-shrink: 0;       /* 🔥 importante para scroll */
+  background: #f5efe6;       /* 🔥 importante para scroll */
 }
 
 /* Música */
@@ -206,7 +206,7 @@ section.show {
 </section>
 
 <!-- DETALLES -->
-<section>
+<section class="hero">
   <h1>20 Marzo 2027</h1>
   <p>5:00 PM</p>
   <button class="btn" onclick="window.open('https://maps.google.com')">Ubicación</button>
