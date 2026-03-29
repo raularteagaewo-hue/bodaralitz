@@ -28,10 +28,7 @@ body {
   z-index: 9999;
 }
 
-.scene {
-  text-align: center;
-  cursor: pointer;
-}
+.scene { text-align: center; cursor: pointer; }
 
 .envelope {
   position: relative;
@@ -97,13 +94,22 @@ section.show {
 
 /* HERO */
 .hero {
-  min-height: 100vh; /* 🔥 clave */
+  min-height: 100vh;
   background:
-    linear-gradient(rgba(245,239,230,0.4), rgba(245,239,230,0.4)),
+    linear-gradient(rgba(245,239,230,0.55), rgba(245,239,230,0.55)),
     url('./base2.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+/* GLASS */
+.hero > * {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(8px);
+  padding: 15px 25px;
+  border-radius: 15px;
+  margin: 10px;
 }
 
 .names {
@@ -111,68 +117,43 @@ section.show {
   font-size: 3rem;
 }
 
-/* Botón */
+/* BOTÓN */
 .btn {
-  margin-top: 20px;
-  padding: 12px 25px;
-  border-radius: 25px;
+  margin-top: 10px;
+  padding: 14px 28px;
+  border-radius: 30px;
   border: none;
-  background: #c9a27c;
+  background: linear-gradient(135deg, #c9a27c, #b8916c);
   color: white;
   cursor: pointer;
 }
 
-/* Contador */
-.timer { display: flex; gap: 10px; }
-.timer div {
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-/* Galería */
+/* GALERÍA */
 .slider {
   display: flex;
   overflow-x: auto;
   gap: 10px;
-  scroll-snap-type: x mandatory;
 }
 
 .slider img {
   width: 85%;
-  height: 220px;        /* altura fija */
-  object-fit: contain;    /* evita deformación */
+  height: 220px;
+  object-fit: cover;
   border-radius: 10px;
-  background: #f5efe6;       /* 🔥 importante para scroll */
 }
 
-/* Música */
-.music-btn {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  background: #c9a27c;
-  color: white;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  border: none;
-}
-
-/* Pétalos */
-.petalo {
-  position: fixed;
-  top: -10px;
-  width: 10px;
-  height: 10px;
-  background: pink;
-  border-radius: 50%;
-  opacity: 0.7;
-  animation: caer linear infinite;
-}
-
-@keyframes caer {
-  to { transform: translateY(110vh) rotate(360deg); }
+/* MODAL */
+#modalRSVP {
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
 }
 </style>
 </head>
@@ -194,12 +175,6 @@ section.show {
   </div>
 </div>
 
-<!-- Música -->
-<button class="music-btn" onclick="toggleMusic()">🎵</button>
-<audio id="music" loop>
-  <source src="./titanic.mp3">
-</audio>
-
 <!-- HERO -->
 <section class="hero">
   <div class="names">Itzel Sánchez <br> & <br> Raúl Arteaga</div>
@@ -211,24 +186,6 @@ section.show {
 <section class="hero">
   <h1>20 Marzo 2027</h1>
   <p>5:00 PM</p>
-  <button class="btn" onclick="window.open('https://maps.google.com')">Ubicación</button>
-</section>
-
-<!-- HISTORIA -->
-<section class="hero">
-  <h1>Nuestra Historia</h1>
-  <p>Dos caminos que se cruzaron para siempre 🤍</p>
-</section>
-
-<!-- CONTADOR -->
-<section class="hero">
-  <h1>Faltan...</h1>
-  <div class="timer">
-    <div><span id="days"></span><br>Días</div>
-    <div><span id="hours"></span><br>Horas</div>
-    <div><span id="minutes"></span><br>Min</div>
-    <div><span id="seconds"></span><br>Seg</div>
-  </div>
 </section>
 
 <!-- GALERÍA -->
@@ -238,68 +195,77 @@ section.show {
     <img src="./boda1.jpg">
     <img src="./boda2.jpg">
     <img src="./boda3.jpg">
-    <img src="./boda4.jpg">
-    <img src="./boda5.jpg">
   </div>
 </section>
 
 <!-- CONFIRMAR -->
 <section class="hero">
   <h1>Confirma tu asistencia</h1>
-  <button class="btn" onclick="confirmar()">WhatsApp</button>
+  <button class="btn" onclick="confirmarForm()">Confirmar</button>
 </section>
 
+<!-- MODAL -->
+<div id="modalRSVP">
+  <div style="background:white;padding:30px;border-radius:20px;width:90%;max-width:400px;text-align:center;">
+    <h2>Confirmar asistencia</h2>
+    <p id="nombreModal"></p>
+
+    <select id="asiste">
+      <option value="">¿Asistirás?</option>
+      <option>Sí</option>
+      <option>No</option>
+    </select>
+
+    <input id="personas" type="number" placeholder="Número de personas">
+
+    <button class="btn" onclick="enviarRSVP()">Enviar</button>
+    <button class="btn" onclick="cerrarModal()">Cancelar</button>
+
+    <p id="msg"></p>
+  </div>
+</div>
+
 <script>
+// 🔴 PEGA TU URL AQUÍ
+const API_URL = "https://script.google.com/macros/s/AKfycbyuH5kh67S7KXl0BGuVq19OimWLNAclI-5DXHmVHo0fMSow6OZFltI6t8-WaZoeTxQJ/exec";
+
+// NOMBRE
+let params=new URLSearchParams(window.location.search);
+let nombre=params.get("nombre") || "Invitado";
+document.getElementById("invitado").innerText = nombre + ", estás invitado 💌";
+
 // INTRO
 function abrirInvitacion(){
   document.querySelector(".scene").classList.add("open");
-  document.getElementById("music").play().catch(()=>{});
-
   setTimeout(()=>{ document.getElementById("intro").style.display="none"; },2000);
 }
 
-// SCROLL
-document.addEventListener("scroll",()=>{
-  document.querySelectorAll("section").forEach(sec=>{
-    if(sec.getBoundingClientRect().top < window.innerHeight-80){
-      sec.classList.add("show");
-    }
+// MODAL
+function confirmarForm(){
+  document.getElementById("modalRSVP").style.display="flex";
+  document.getElementById("nombreModal").innerText=nombre;
+}
+
+function cerrarModal(){
+  document.getElementById("modalRSVP").style.display="none";
+}
+
+// ENVIAR
+function enviarRSVP(){
+  let asiste=document.getElementById("asiste").value;
+  let personas=document.getElementById("personas").value;
+
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      nombre:nombre,
+      asiste:asiste,
+      personas:personas||1
+    })
+  })
+  .then(()=>{
+    document.getElementById("msg").innerText="Confirmado 💍";
   });
-});
-
-// CONTADOR
-let fecha=new Date("March 20, 2027 17:00:00").getTime();
-setInterval(()=>{
-  let diff=fecha-new Date().getTime();
-  days.innerText=Math.floor(diff/(1000*60*60*24));
-  hours.innerText=Math.floor((diff/(1000*60*60))%24);
-  minutes.innerText=Math.floor((diff/(1000*60))%60);
-  seconds.innerText=Math.floor((diff/1000)%60);
-},1000);
-
-// WHATSAPP
-function confirmar(){
-  window.open("https://wa.me/524772549552?text=Confirmo%20mi%20asistencia%20💍");
-}
-
-// MÚSICA
-function toggleMusic(){
-  let m=document.getElementById("music");
-  m.paused ? m.play() : m.pause();
-}
-
-// NOMBRE DINÁMICO
-let p=new URLSearchParams(window.location.search);
-let n=p.get("nombre");
-if(n) document.getElementById("invitado").innerText=n + ", estás invitado 💌";
-
-// PÉTALOS
-for(let i=0;i<20;i++){
-  let p=document.createElement("div");
-  p.className="petalo";
-  p.style.left=Math.random()*100+"vw";
-  p.style.animationDuration=(5+Math.random()*5)+"s";
-  document.body.appendChild(p);
 }
 </script>
 
