@@ -16,11 +16,6 @@ body {
   overflow-x: hidden;
 }
 
-section {
-  opacity: 1 !important;
-  transform: none !important;
-}
-
 /* INTRO */
 #intro {
   position: fixed;
@@ -39,7 +34,6 @@ section {
   position: relative;
   width: 280px;
   height: 180px;
-  perspective: 1000px;
 }
 
 .body-env {
@@ -99,22 +93,11 @@ section.show {
 
 /* HERO */
 .hero {
-  min-height: 100vh;
   background:
-    linear-gradient(rgba(245,239,230,0.55), rgba(245,239,230,0.55)),
+    linear-gradient(rgba(245,239,230,0.5), rgba(245,239,230,0.5)),
     url('./base2.jpg');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* GLASS */
-.hero > * {
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(8px);
-  padding: 15px 25px;
-  border-radius: 15px;
-  margin: 10px;
 }
 
 .names {
@@ -122,43 +105,60 @@ section.show {
   font-size: 3rem;
 }
 
-/* BOTÓN */
 .btn {
-  margin-top: 10px;
-  padding: 14px 28px;
-  border-radius: 30px;
+  margin-top: 20px;
+  padding: 12px 25px;
+  border-radius: 25px;
   border: none;
-  background: linear-gradient(135deg, #c9a27c, #b8916c);
+  background: #c9a27c;
   color: white;
   cursor: pointer;
 }
 
-/* GALERÍA */
-.slider {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-}
-
-.slider img {
-  width: 85%;
-  height: 220px;
-  object-fit: cover;
+/* CONTADOR */
+.timer { display: flex; gap: 10px; }
+.timer div {
+  background: white;
+  padding: 10px;
   border-radius: 10px;
 }
 
-/* MODAL */
-#modalRSVP {
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
+/* MODAL RSVP */
+.modal {
+  position: fixed;
+  top:0; left:0;
   width:100%;
   height:100%;
-  background:rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.6);
+  display:none;
   justify-content:center;
   align-items:center;
-  z-index:9999;
+}
+
+.modal-content {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  width:300px;
+}
+
+input, select {
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+
+/* MUSICA */
+.music-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #c9a27c;
+  color: white;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  border: none;
 }
 </style>
 </head>
@@ -180,6 +180,11 @@ section.show {
   </div>
 </div>
 
+<button class="music-btn" onclick="toggleMusic()">🎵</button>
+<audio id="music" loop>
+  <source src="./titanic.mp3">
+</audio>
+
 <!-- HERO -->
 <section class="hero">
   <div class="names">Itzel Sánchez <br> & <br> Raúl Arteaga</div>
@@ -193,74 +198,92 @@ section.show {
   <p>5:00 PM</p>
 </section>
 
-<!-- GALERÍA -->
+<!-- CONTADOR -->
 <section class="hero">
-  <h1>Momentos</h1>
-  <div class="slider">
-    <img src="./boda1.jpg">
-    <img src="./boda2.jpg">
-    <img src="./boda3.jpg">
-    <img src="./boda4.jpg">
-    <img src="./boda5.jpg">
+  <h1>Faltan...</h1>
+  <div class="timer">
+    <div><span id="days"></span><br>Días</div>
+    <div><span id="hours"></span><br>Horas</div>
+    <div><span id="minutes"></span><br>Min</div>
+    <div><span id="seconds"></span><br>Seg</div>
   </div>
 </section>
 
-<!-- CONFIRMAR -->
+<!-- RSVP -->
 <section class="hero">
   <h1>Confirma tu asistencia</h1>
-  <button class="btn" onclick="confirmarForm()">Confirmar</button>
+  <button class="btn" onclick="abrirModal()">Confirmar</button>
 </section>
 
 <!-- MODAL -->
-<div id="modalRSVP">
-  <div style="background:white;padding:30px;border-radius:20px;width:90%;max-width:400px;text-align:center;">
-    <h2>Confirmar asistencia</h2>
-    <p id="nombreModal"></p>
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h3>Confirmar asistencia</h3>
 
     <select id="asiste">
       <option value="">¿Asistirás?</option>
-      <option>Sí</option>
-      <option>No</option>
+      <option value="SI">Sí</option>
+      <option value="NO">No</option>
     </select>
 
-    <input id="personas" type="number" placeholder="Número de personas">
+    <input type="number" id="personas" placeholder="Número de personas">
 
     <button class="btn" onclick="enviarRSVP()">Enviar</button>
-    <button class="btn" onclick="cerrarModal()">Cancelar</button>
-
     <p id="msg"></p>
   </div>
 </div>
 
 <script>
-// 🔴 PEGA TU URL AQUÍ
 const API_URL = "https://script.google.com/macros/s/AKfycbyuH5kh67S7KXl0BGuVq19OimWLNAclI-5DXHmVHo0fMSow6OZFltI6t8-WaZoeTxQJ/exec";
 
-// NOMBRE
-let params=new URLSearchParams(window.location.search);
-let nombre=params.get("nombre") || "Invitado";
+// nombre dinámico
+let params = new URLSearchParams(window.location.search);
+let nombre = params.get("nombre") || "Invitado";
 document.getElementById("invitado").innerText = nombre + ", estás invitado 💌";
 
-// INTRO
+// intro
 function abrirInvitacion(){
   document.querySelector(".scene").classList.add("open");
+  let audio = document.getElementById("music");
+  audio.play().catch(()=>{});
   setTimeout(()=>{ document.getElementById("intro").style.display="none"; },2000);
 }
 
-// MODAL
-function confirmarForm(){
-  document.getElementById("modalRSVP").style.display="flex";
-  document.getElementById("nombreModal").innerText=nombre;
+// scroll animación
+function mostrarSecciones(){
+  document.querySelectorAll("section").forEach(sec=>{
+    if(sec.getBoundingClientRect().top < window.innerHeight - 80){
+      sec.classList.add("show");
+    }
+  });
+}
+window.addEventListener("scroll", mostrarSecciones);
+window.addEventListener("load", mostrarSecciones);
+
+// contador
+const fecha = new Date("March 20, 2027 17:00:00").getTime();
+setInterval(()=>{
+  let diff=fecha-new Date().getTime();
+  document.getElementById("days").innerText=Math.floor(diff/(1000*60*60*24));
+  document.getElementById("hours").innerText=Math.floor((diff/(1000*60*60))%24);
+  document.getElementById("minutes").innerText=Math.floor((diff/(1000*60))%60);
+  document.getElementById("seconds").innerText=Math.floor((diff/1000)%60);
+},1000);
+
+// modal
+function abrirModal(){
+  document.getElementById("modal").style.display="flex";
 }
 
-function cerrarModal(){
-  document.getElementById("modalRSVP").style.display="none";
-}
-
-// ENVIAR
+// enviar
 function enviarRSVP(){
   let asiste=document.getElementById("asiste").value;
   let personas=document.getElementById("personas").value;
+
+  if(!asiste){
+    alert("Selecciona opción");
+    return;
+  }
 
   fetch(API_URL,{
     method:"POST",
@@ -272,7 +295,16 @@ function enviarRSVP(){
   })
   .then(()=>{
     document.getElementById("msg").innerText="Confirmado 💍";
+  })
+  .catch(()=>{
+    document.getElementById("msg").innerText="Error 😢";
   });
+}
+
+// música
+function toggleMusic(){
+  let m=document.getElementById("music");
+  m.paused ? m.play() : m.pause();
 }
 </script>
 
