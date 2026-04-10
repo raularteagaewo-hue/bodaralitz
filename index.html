@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Invitación de Boda - [Tus Nombres]</title>
+    <title>Invitación de Boda - María Fernanda & Alejandro</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- Leaflet CSS para el mapa -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -42,19 +42,31 @@
             transform: translateY(-5px);
         }
 
-        /* Hero section */
-        .hero {
-            background: linear-gradient(135deg, #e8d9c5 0%, #f4ede4 100%);
-            padding: 40px 20px 30px;
-            text-align: center;
-            position: relative;
-        }
+       /* Hero section con imagen de portada */
+.hero {
+    padding: 0;
+    text-align: center;
+    position: relative;
+    background: #f4ede4;
+}
 
-        .floral-icon {
-            font-size: 48px;
-            opacity: 0.6;
-            margin-bottom: 15px;
-            letter-spacing: 8px;
+/* Foto de portada (ancho completo) */
+.cover-photo {
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+}
+
+/* Contenedor del texto superpuesto */
+.hero-content {
+    padding: 20px 20px 30px;
+    background: linear-gradient(135deg, #e8d9c5 0%, #f4ede4 100%);
+}
+        .couple-photo:hover {
+            transform: scale(1.02);
         }
 
         .hero h2 {
@@ -345,6 +357,32 @@
             transform: scale(1.02);
         }
 
+        /* Control de música */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #5e3a2b;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: all 0.3s;
+            font-size: 24px;
+            border: 2px solid white;
+        }
+
+        .music-control:hover {
+            transform: scale(1.1);
+            background: #7e543e;
+        }
+
         .extra-note {
             text-align: center;
             font-size: 0.8rem;
@@ -378,21 +416,28 @@
             .event-date { font-size: 1.5rem; }
             .time-number { font-size: 1.5rem; }
             .time-box { min-width: 55px; padding: 8px; }
+            .music-control { width: 40px; height: 40px; font-size: 18px; bottom: 15px; right: 15px; }
         }
     </style>
 </head>
 <body>
     <div class="invitation-card">
-        <div class="hero">
-            <div class="floral-icon">✿ ✤ ✿</div>
-            <h2>Nos casamos</h2>
-            <h1>
-                <span>María Fernanda</span>
-                <span class="ampersand">&</span>
-                <span>Alejandro</span>
-            </h1>
-            <div class="date-badge">⭐  SAVE THE DATE  ⭐</div>
-        </div>
+       <div class="hero">
+    <!-- FOTO DE PORTADA - REEMPLAZA ESTA URL CON TU FOTO -->
+    <img src="./boda1.jpg" 
+         alt="María Fernanda y Alejandro" 
+         class="cover-photo"
+         id="coverPhoto">
+    <div class="hero-content">
+        <h2>Nos casamos</h2>
+        <h1>
+            <span>María Fernanda</span>
+            <span class="ampersand">&</span>
+            <span>Alejandro</span>
+        </h1>
+        <div class="date-badge">⭐  SAVE THE DATE  ⭐</div>
+    </div>
+</div>
 
         <div class="content">
             <div class="invitation-text">
@@ -421,7 +466,7 @@
                 <div class="event-place"><span class="icon">🗺️</span> Carretera a Tepoztlán Km 5, Morelos, México</div>
             </div>
 
-            <!-- MAPA INTERACTIVO (Leaflet) -->
+            <!-- MAPA INTERACTIVO -->
             <div class="map-container">
                 <div id="weddingMap"></div>
             </div>
@@ -429,9 +474,7 @@
             <!-- GALERÍA DE FOTOS -->
             <div class="gallery-section">
                 <div class="gallery-title">📸 Nuestros momentos juntos 📸</div>
-                <div class="gallery-grid" id="galleryGrid">
-                    <!-- Las imágenes se cargarán con JS pero pondré ejemplos de imágenes de placeholder (unsplash) -->
-                </div>
+                <div class="gallery-grid" id="galleryGrid"></div>
             </div>
 
             <!-- HORARIO DE EVENTOS -->
@@ -457,6 +500,11 @@
         </div>
     </div>
 
+    <!-- BOTÓN DE CONTROL DE MÚSICA -->
+    <div class="music-control" id="musicToggle">
+        🔇
+    </div>
+
     <!-- Modal para galería -->
     <div id="imageModal" class="modal">
         <span class="modal-close">&times;</span>
@@ -467,7 +515,59 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // ========================
-        // 1. CUENTA REGRESIVA
+        // 1. MÚSICA DE FONDO (con control de mute)
+        // ========================
+        // Creamos un elemento de audio con una canción romántica (Canon en D - Pachelbel)
+        // Puedes cambiar la URL por cualquier canción que tengas alojada o de un servicio público
+        const audio = new Audio('./titanic.mp3');
+        audio.loop = true;
+        audio.volume = 0.5; // Volumen al 50%
+        
+        let isPlaying = false;
+        const musicToggle = document.getElementById('musicToggle');
+        
+        // Intentar reproducir automáticamente (los navegadores pueden bloquearlo)
+        // Por eso mostramos el botón para que el usuario inicie manualmente
+        function playMusic() {
+            audio.play().then(() => {
+                isPlaying = true;
+                musicToggle.innerHTML = '🔊';
+            }).catch(err => {
+                console.log("Autoplay bloqueado. El usuario debe hacer clic en el botón.");
+                musicToggle.innerHTML = '🔇';
+                isPlaying = false;
+            });
+        }
+        
+        // Toggle play/pause
+        musicToggle.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                musicToggle.innerHTML = '🔇';
+            } else {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    musicToggle.innerHTML = '🔊';
+                }).catch(err => {
+                    alert("Haz clic en cualquier lugar de la página para activar la música primero.");
+                });
+            }
+        });
+        
+        // También intentar reproducir al hacer clic en cualquier parte (para superar restricciones de autoplay)
+        document.body.addEventListener('click', function initAudio() {
+            if (!isPlaying) {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    musicToggle.innerHTML = '🔊';
+                }).catch(() => {});
+            }
+            document.body.removeEventListener('click', initAudio);
+        });
+        
+        // ========================
+        // 2. CUENTA REGRESIVA
         // ========================
         function updateCountdown() {
             const weddingDate = new Date("May 15, 2026 18:00:00").getTime();
@@ -493,23 +593,20 @@
         updateCountdown();
 
         // ========================
-        // 2. MAPA INTERACTIVO (Hacienda Los Encinos, Morelos)
+        // 3. MAPA INTERACTIVO
         // ========================
-        // Coordenadas aproximadas de Tepoztlán / Hacienda Los Encinos
-        const map = L.map('weddingMap').setView([18.9857, -99.0954], 15); // Zona de Tepoztlán
+        const map = L.map('weddingMap').setView([18.9857, -99.0954], 15);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> & CartoDB',
             subdomains: 'abcd',
             maxZoom: 19
         }).addTo(map);
-        // Marcador en la ubicación de la hacienda
         L.marker([18.9857, -99.0954]).addTo(map)
             .bindPopup('<b>Hacienda Los Encinos</b><br>Carretera a Tepoztlán Km 5, Morelos.<br>¡Te esperamos!')
             .openPopup();
 
         // ========================
-        // 3. GALERÍA DE FOTOS (usando imágenes gratuitas de Unsplash)
-        //    Puedes reemplazar las URLs con tus propias fotos.
+        // 4. GALERÍA DE FOTOS
         // ========================
         const galleryImages = [
             "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop",
@@ -529,7 +626,6 @@
             img.alt = "Foto de la pareja";
             img.loading = "lazy";
             div.appendChild(img);
-            // Al hacer click, abrir modal
             div.addEventListener('click', () => {
                 const modal = document.getElementById('imageModal');
                 const modalImg = document.getElementById('modalImage');
@@ -550,14 +646,13 @@
         });
 
         // ========================
-        // 4. RSVP BOTÓN
+        // 5. RSVP BOTÓN
         // ========================
         document.getElementById('rsvpButton').addEventListener('click', function(e) {
-            e.preventDefault();
-            // Aquí puedes poner tu enlace de Google Forms o cualquier otro
-            alert('✨ Gracias por tu interés. Aquí iría el enlace para confirmar asistencia.\n\n👉 Reemplaza este alert con un formulario real (Google Forms, Typeform, etc.)');
-            // Ejemplo: window.open("https://forms.gle/tuformulario", "_blank");
-        });
+    e.preventDefault();
+    // Abre tu formulario de Google Apps Script en una nueva pestaña
+    window.open('https://script.google.com/macros/s/AKfycbzkFDITxd02Ak69-TytPE2-QytFl-yz8rSUl1pB0KN4jI8pVEFxV7E5H2mkyW0MDxplZQ/exec', '_blank');
+});
     </script>
 </body>
 </html>
