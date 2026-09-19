@@ -3,656 +3,1000 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Invitación de Boda - María Fernanda & Alejandro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Leaflet CSS para el mapa -->
+    <title>Itzel & Raúl · Nuestra Boda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Parisienne&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root{
+            --sage-900:#33402d;
+            --sage-800:#425339;
+            --sage-700:#526645;
+            --sage-600:#6a7f58;
+            --sage-500:#84976f;
+            --sage-400:#a3b48d;
+            --sage-300:#c3d2ae;
+            --sage-200:#dde7cd;
+            --sage-150:#e9f0dd;
+            --sage-100:#f2f6ea;
+            --cream:#faf8f2;
+            --white:#ffffff;
+            --gold:#b6a06a;
+            --ink:#333c2c;
+        }
+        *{ margin:0; padding:0; box-sizing:border-box; }
+
+        html{ scroll-behavior:smooth; }
+
+        body{
+            background:var(--cream);
+            font-family:'Cormorant Garamond', serif;
+            font-size:1.15rem;
+            color:var(--ink);
+            line-height:1.6;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            padding:20px;
         }
 
-        body {
-            background: #faf7f2;
-            font-family: 'Poppins', sans-serif;
-            color: #4a3b2c;
-            line-height: 1.5;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .wedding-container{
+            position:relative;
+            max-width:1000px;
+            width:100%;
+            margin:0 auto;
+            background:var(--white);
+            border-radius:48px;
+            box-shadow:0 30px 60px -15px rgba(51,64,45,0.25);
+            overflow:hidden;
         }
 
-        /* Contenedor principal */
-        .invitation-card {
-            max-width: 650px;
-            width: 100%;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 32px;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            transition: transform 0.3s ease;
+        /* ===================== ENVELOPE INTRO ===================== */
+        .envelope-screen{
+            position:fixed;
+            inset:0;
+            z-index:999;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:28px;
+            background:
+                radial-gradient(circle at 20% 15%, rgba(255,255,255,0.5), transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(255,255,255,0.35), transparent 50%),
+                linear-gradient(160deg, var(--sage-600), var(--sage-800));
+            transition:opacity 0.9s ease, visibility 0.9s ease;
+        }
+        .envelope-screen.closing{ opacity:0; visibility:hidden; pointer-events:none; }
+        .envelope-screen .env-kicker{
+            font-family:'Poppins', sans-serif;
+            letter-spacing:5px;
+            font-size:0.75rem;
+            color:var(--sage-150);
+            text-transform:uppercase;
+        }
+        .envelope-wrap{
+            perspective:1400px;
+            width:280px;
+        }
+        .envelope{
+            position:relative;
+            width:280px;
+            height:190px;
+        }
+        .envelope-back{
+            position:absolute;
+            inset:0;
+            background:var(--sage-100);
+            border-radius:14px;
+            box-shadow:0 25px 45px rgba(0,0,0,0.28);
+            overflow:hidden;
+        }
+        .envelope-back:before, .envelope-back:after{
+            content:'';
+            position:absolute;
+            bottom:0;
+            width:0; height:0;
+            border-bottom:96px solid rgba(132,151,111,0.35);
+        }
+        .envelope-back:before{
+            left:0;
+            border-left:140px solid transparent;
+            border-right:0;
+        }
+        .envelope-back:after{
+            right:0;
+            border-right:140px solid transparent;
+            border-left:0;
+        }
+        .envelope-card{
+            position:absolute;
+            left:10px; right:10px; bottom:10px;
+            top:34px;
+            background:var(--white);
+            border-radius:10px;
+            box-shadow:0 6px 18px rgba(0,0,0,0.12);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            padding:10px;
+            transform:translateY(6%);
+            transition:transform 0.9s ease 0.15s;
+            z-index:1;
+        }
+        .envelope-card .brand-script{ font-size:1.5rem; color:var(--sage-700); }
+        .envelope-card .env-sub{
+            font-family:'Poppins', sans-serif;
+            font-size:0.65rem;
+            letter-spacing:2px;
+            color:var(--sage-500);
+            text-transform:uppercase;
+            margin-top:4px;
+        }
+        .envelope-flap{
+            position:absolute;
+            top:0; left:0;
+            width:0; height:0;
+            border-left:140px solid transparent;
+            border-right:140px solid transparent;
+            border-top:96px solid var(--sage-300);
+            transform-origin:top center;
+            transition:transform 1s cubic-bezier(.6,.1,.3,1);
+            z-index:3;
+            filter:drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+        }
+        .envelope-wrap.open .envelope-flap{ transform:rotateX(180deg); }
+        .envelope-wrap.open .envelope-card{ transform:translateY(-18%); }
+        .envelope-seal{
+            position:absolute;
+            top:74px; left:50%;
+            transform:translate(-50%,-50%);
+            width:56px; height:56px;
+            border-radius:50%;
+            background:radial-gradient(circle at 35% 30%, #cdbb85, var(--gold));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-family:'Parisienne', cursive;
+            font-size:1.3rem;
+            color:#fffdf6;
+            box-shadow:0 6px 14px rgba(0,0,0,0.25);
+            z-index:4;
+            cursor:pointer;
+            transition:transform 0.25s ease, opacity 0.5s ease;
+            animation:pulseSeal 2.4s ease-in-out infinite;
+        }
+        .envelope-wrap.open .envelope-seal{ opacity:0; transform:translate(-50%,-50%) scale(0.4); }
+        @keyframes pulseSeal{
+            0%,100%{ box-shadow:0 6px 14px rgba(0,0,0,0.25), 0 0 0 0 rgba(255,255,255,0.35); }
+            50%{ box-shadow:0 6px 14px rgba(0,0,0,0.25), 0 0 0 10px rgba(255,255,255,0); }
+        }
+        .envelope-hint{
+            font-family:'Poppins', sans-serif;
+            font-size:0.85rem;
+            color:var(--sage-150);
+            letter-spacing:1px;
+        }
+        .envelope-btn{
+            font-family:'Poppins', sans-serif;
+            background:var(--sage-100);
+            color:var(--sage-800);
+            border:none;
+            padding:12px 30px;
+            border-radius:40px;
+            font-size:0.85rem;
+            letter-spacing:1px;
+            cursor:pointer;
+            box-shadow:0 8px 18px rgba(0,0,0,0.2);
+            transition:all 0.3s;
+        }
+        .envelope-btn:hover{ background:var(--white); transform:translateY(-2px); }
+
+        /* ===================== HERO ===================== */
+        .hero-cover{
+            position:relative;
+            height:78vh;
+            min-height:520px;
+            background-size:cover;
+            background-position:center 35%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            color:white;
+        }
+        .hero-overlay{
+            position:absolute; inset:0;
+            background:linear-gradient(180deg, rgba(51,64,45,0.35) 0%, rgba(51,64,45,0.55) 60%, rgba(51,64,45,0.8) 100%);
+        }
+        .hero-content{ position:relative; z-index:2; padding:20px; }
+        .hero-content .kicker{
+            font-family:'Poppins', sans-serif;
+            font-size:0.85rem;
+            font-weight:400;
+            letter-spacing:7px;
+            margin-bottom:18px;
+            text-transform:uppercase;
+            color:var(--sage-150);
+        }
+        .hero-content .brand-script{
+            font-family:'Parisienne', cursive;
+            font-size:5rem;
+            font-weight:400;
+            line-height:1.15;
+            margin:8px 0 4px;
+            color:#ffffff;
+            text-shadow:0 6px 24px rgba(0,0,0,0.35);
+        }
+        .hero-content .amp{ font-size:2.6rem; opacity:0.85; padding:0 6px; }
+        .hero-content .hero-date{
+            font-family:'Poppins', sans-serif;
+            letter-spacing:3px;
+            font-size:0.95rem;
+            margin-top:6px;
+            color:var(--sage-100);
+        }
+        .btn-play{
+            background:rgba(255,255,255,0.15);
+            backdrop-filter:blur(6px);
+            border:1.5px solid rgba(255,255,255,0.8);
+            width:60px; height:60px;
+            border-radius:50%;
+            display:inline-flex; align-items:center; justify-content:center;
+            font-size:22px;
+            cursor:pointer;
+            margin:26px 0 10px;
+            transition:all 0.3s;
+            color:white;
+        }
+        .btn-play:hover{ background:white; color:var(--sage-700); transform:scale(1.06); }
+
+        .leaf-divider{ display:flex; justify-content:center; padding:6px 0 0; opacity:0.7; }
+
+        .section{ padding:64px 24px; max-width:860px; margin:0 auto; text-align:center; }
+        .section-kicker{
+            font-family:'Poppins', sans-serif;
+            font-size:0.72rem;
+            letter-spacing:4px;
+            text-transform:uppercase;
+            color:var(--sage-500);
+            margin-bottom:10px;
+        }
+        .section-title{
+            font-family:'Playfair Display', serif;
+            font-size:2.1rem;
+            color:var(--sage-800);
+            margin-bottom:36px;
+            position:relative;
+            display:inline-block;
+        }
+        .section-title:after{
+            content:'';
+            position:absolute;
+            bottom:-14px; left:30%;
+            width:40%; height:1.5px;
+            background:var(--sage-400);
+        }
+        .verse{
+            font-family:'Cormorant Garamond', serif;
+            font-style:italic;
+            font-size:1.5rem;
+            max-width:640px;
+            margin:0 auto 20px;
+            color:var(--sage-700);
         }
 
-        .invitation-card:hover {
-            transform: translateY(-5px);
+        .parents-grid, .godparents-grid{
+            display:flex; flex-wrap:wrap; justify-content:center; gap:30px; margin:34px 0;
+        }
+        .card{
+            background:var(--sage-100);
+            padding:26px 30px;
+            border-radius:28px;
+            min-width:240px;
+            box-shadow:0 8px 20px rgba(51,64,45,0.05);
+            border:1px solid var(--sage-200);
+            text-align:center;
+        }
+        .card h4{
+            font-family:'Playfair Display', serif;
+            font-size:1.2rem;
+            color:var(--sage-700);
+            margin-bottom:14px;
+            font-weight:600;
+        }
+        .card p{ color:var(--ink); }
+
+        /* Gallery */
+        .gallery-grid{
+            display:grid;
+            grid-template-columns:repeat(6,1fr);
+            grid-auto-rows:110px;
+            gap:12px;
+            margin-top:30px;
+        }
+        .gallery-item{
+            border-radius:20px;
+            overflow:hidden;
+            border:4px solid var(--white);
+            box-shadow:0 10px 24px rgba(51,64,45,0.18);
+            transition:transform 0.35s ease;
+            background:linear-gradient(160deg, var(--sage-150), var(--sage-300));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .gallery-item img{ width:100%; height:100%; object-fit:contain; display:block; }
+        .gallery-item:hover{ transform:translateY(-4px) scale(1.02); }
+        .gallery-item.g1{ grid-column:1 / span 3; grid-row:1 / span 2; }
+        .gallery-item.g2{ grid-column:4 / span 3; grid-row:1 / span 2; }
+        .gallery-item.g3{ grid-column:1 / span 2; grid-row:3 / span 2; }
+        .gallery-item.g4{ grid-column:3 / span 2; grid-row:3 / span 2; }
+        .gallery-item.g5{ grid-column:5 / span 2; grid-row:3 / span 2; }
+
+        .date-grid{
+            background:var(--sage-100);
+            border-radius:44px;
+            padding:44px 20px;
+            margin:30px 0;
+            text-align:center;
+        }
+        .big-date{
+            font-family:'Playfair Display', serif;
+            font-size:2.6rem;
+            font-weight:700;
+            color:var(--sage-800);
+            line-height:1.2;
+            letter-spacing:1px;
+        }
+        .date-agenda{
+            font-family:'Poppins', sans-serif;
+            font-size:0.85rem;
+            letter-spacing:1px;
+            color:var(--sage-600);
+            margin:16px 0 8px;
+        }
+        .countdown-timer{
+            display:flex; justify-content:center; gap:18px; flex-wrap:wrap; margin:30px 0 10px;
+        }
+        .time-box{
+            background:var(--white);
+            padding:16px 18px;
+            border-radius:22px;
+            min-width:82px;
+            box-shadow:0 6px 16px rgba(51,64,45,0.08);
+            text-align:center;
+        }
+        .time-number{ font-size:2.1rem; font-weight:700; color:var(--sage-700); font-family:'Playfair Display', serif; }
+        .time-box div:last-child{ font-family:'Poppins', sans-serif; font-size:0.7rem; letter-spacing:1px; text-transform:uppercase; color:var(--sage-500); margin-top:4px; }
+
+        .events-row{ display:flex; flex-wrap:wrap; justify-content:center; gap:26px; margin:36px 0; }
+        .event-card{
+            flex:1; min-width:260px;
+            background:var(--sage-100);
+            border-radius:28px;
+            padding:26px;
+            border:1px solid var(--sage-200);
+            text-align:center;
+        }
+        .event-card h4{ font-family:'Playfair Display', serif; color:var(--sage-800); margin-bottom:6px; font-size:1.15rem; }
+        .map-placeholder{ height:170px; background:var(--sage-200); border-radius:20px; margin:14px 0 0; overflow:hidden; }
+        #mapCeremonia, #mapRecepcion{ height:100%; width:100%; }
+
+        .dress-box{
+            background:var(--sage-150);
+            border-radius:36px;
+            padding:32px;
+            margin:36px 0;
+            text-align:center;
+            border:1px solid var(--sage-200);
+        }
+        .dress-box h3, .gifts-block h3{ font-family:'Playfair Display', serif; color:var(--sage-800); margin-bottom:8px; }
+        .gift-options{ display:flex; flex-wrap:wrap; justify-content:center; gap:18px; margin-top:26px; }
+        .gift-card{
+            background:var(--white);
+            border:1px solid var(--sage-200);
+            border-radius:24px;
+            padding:20px;
+            width:180px;
+            text-align:center;
+            box-shadow:0 4px 12px rgba(51,64,45,0.06);
+            font-family:'Poppins', sans-serif;
+            font-size:0.95rem;
+            color:var(--sage-800);
         }
 
-       /* Hero section con imagen de portada */
-.hero {
-    padding: 0;
-    text-align: center;
-    position: relative;
-    background: #f4ede4;
-}
+        .rsvp-modern{
+            background:linear-gradient(155deg, var(--sage-100), var(--sage-150));
+            border-radius:44px;
+            padding:42px 30px;
+            margin:50px 0 10px;
+            text-align:center;
+        }
+        .rsvp-modern form{ max-width:500px; margin:0 auto; text-align:left; }
+        .form-group{ margin-bottom:20px; }
+        .form-group label{ font-family:'Poppins', sans-serif; font-weight:500; font-size:0.85rem; display:block; margin-bottom:8px; color:var(--sage-800); }
+        .form-group input, .form-group select, .form-group textarea{
+            width:100%; padding:13px 14px; border-radius:22px;
+            border:1px solid var(--sage-300);
+            background:var(--white);
+            font-family:'Cormorant Garamond', serif;
+            font-size:1.05rem;
+            color:var(--ink);
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus{
+            outline:none; border-color:var(--sage-600);
+        }
+        .form-group input:disabled, .form-group select:disabled, .form-group textarea:disabled{
+            background:var(--sage-150); cursor:not-allowed;
+        }
+        .btn-submit{
+            font-family:'Poppins', sans-serif;
+            background:var(--sage-700);
+            color:white; border:none; padding:14px 30px; border-radius:40px;
+            font-weight:500; cursor:pointer; width:100%; font-size:1rem;
+            letter-spacing:0.5px;
+            transition:all 0.3s;
+        }
+        .btn-submit:hover:not(:disabled){ background:var(--sage-800); transform:scale(1.02); }
+        .btn-submit:disabled{ background:#b7c2ac; cursor:not-allowed; }
 
-/* Foto de portada (ancho completo) */
-.cover-photo {
-    width: 100%;
-    height: auto;
-    max-height: 350px;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s;
-}
-
-/* Contenedor del texto superpuesto */
-.hero-content {
-    padding: 20px 20px 30px;
-    background: linear-gradient(135deg, #e8d9c5 0%, #f4ede4 100%);
-}
-        .couple-photo:hover {
-            transform: scale(1.02);
+        .confirmado-badge{
+            background:#e4efd9; color:var(--sage-800);
+            text-align:center; padding:16px; border-radius:28px; margin-bottom:22px;
+            border:1px solid var(--sage-300);
         }
 
-        .hero h2 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 400;
-            font-size: 1.1rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #9b7b5c;
-            margin-bottom: 12px;
+        .music-control{
+            position:fixed; bottom:25px; right:25px;
+            background:var(--sage-700); width:52px; height:52px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center; cursor:pointer;
+            color:white; font-size:22px; z-index:99;
+            box-shadow:0 6px 16px rgba(51,64,45,0.35);
+            transition:all 0.3s;
         }
+        .music-control:hover{ transform:scale(1.06); background:var(--sage-800); }
 
-        .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.6rem;
-            font-weight: 600;
-            color: #5e3a2b;
-            margin: 10px 0;
-            line-height: 1.2;
+        footer{
+            background:var(--sage-800);
+            color:var(--sage-100);
+            text-align:center; padding:34px;
+            font-family:'Poppins', sans-serif;
+            font-size:0.8rem;
         }
+        footer .foot-script{ font-family:'Parisienne', cursive; font-size:1.5rem; color:white; display:block; margin-bottom:6px; }
 
-        .hero .ampersand {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-style: italic;
-            color: #c29a6b;
-            margin: 0 8px;
-        }
+        .error-card{ text-align:center; padding:60px 30px; background:white; border-radius:48px; }
+        .error-card h2{ color:var(--sage-700); margin-bottom:20px; font-family:'Playfair Display', serif; }
 
-        .date-badge {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(4px);
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 50px;
-            margin-top: 20px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: #7a5a44;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-
-        /* Contenido principal */
-        .content {
-            padding: 30px 28px 40px;
-        }
-
-        .invitation-text {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .invitation-text p {
-            font-size: 1rem;
-            color: #6b5a4c;
-            margin-bottom: 12px;
-        }
-
-        .invitation-text .quote {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: 1.2rem;
-            color: #b48c63;
-            margin: 20px 0 10px;
-        }
-
-        /* Cuenta regresiva */
-        .countdown-section {
-            background: linear-gradient(135deg, #fefaf5 0%, #fcf6ef 100%);
-            border-radius: 28px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-            border: 1px solid #f0e4d8;
-        }
-
-        .countdown-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            color: #5e3a2b;
-            margin-bottom: 15px;
-        }
-
-        .countdown-timer {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .time-box {
-            background: white;
-            padding: 12px 10px;
-            border-radius: 16px;
-            min-width: 70px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border: 1px solid #e8d9ce;
-        }
-
-        .time-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #5e3a2b;
-            font-family: 'Playfair Display', serif;
-            line-height: 1;
-        }
-
-        .time-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #9b7b5c;
-            margin-top: 5px;
-        }
-
-        /* Detalles */
-        .details {
-            background: #fefaf5;
-            border-radius: 28px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-            border: 1px solid #f0e4d8;
-        }
-
-        .event-date {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #5e3a2b;
-            margin-bottom: 8px;
-        }
-
-        .event-day {
-            font-size: 1rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #b48c63;
-            margin-bottom: 15px;
-        }
-
-        .event-time, .event-place {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 1rem;
-            margin: 12px 0;
-            color: #4a3b2c;
-        }
-
-        /* Mapa interactivo */
-        .map-container {
-            margin: 20px 0;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 2px solid #f0e4d8;
-        }
-
-        #weddingMap {
-            height: 250px;
-            width: 100%;
-            z-index: 1;
-        }
-
-        /* Galería de fotos */
-        .gallery-section {
-            margin: 25px 0;
-        }
-
-        .gallery-title {
-            font-family: 'Playfair Display', serif;
-            text-align: center;
-            font-size: 1.3rem;
-            color: #5e3a2b;
-            margin-bottom: 15px;
-        }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-
-        .gallery-item {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            cursor: pointer;
-            aspect-ratio: 1 / 1;
-            background: #f0e4d8;
-            transition: transform 0.3s;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.02);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        /* Modal para ver fotos grandes */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .modal img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 16px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 35px;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* Horarios */
-        .schedule {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0 25px;
-            text-align: center;
-        }
-
-        .schedule-item {
-            flex: 1;
-            min-width: 120px;
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 12px 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            border: 1px solid #f3e9e1;
-        }
-
-        .schedule-item strong {
-            display: block;
-            font-family: 'Playfair Display', serif;
-            font-size: 1rem;
-            color: #9b7b5c;
-            margin-bottom: 6px;
-        }
-
-        /* Botón RSVP */
-        .rsvp-btn {
-            display: block;
-            background: #5e3a2b;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 14px 20px;
-            border-radius: 60px;
-            margin: 25px 0 20px;
-            transition: all 0.3s;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 5px 12px rgba(94,58,43,0.2);
-        }
-
-        .rsvp-btn:hover {
-            background: #7e543e;
-            transform: scale(1.02);
-        }
-
-        /* Control de música */
-        .music-control {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #5e3a2b;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 100;
-            transition: all 0.3s;
-            font-size: 24px;
-            border: 2px solid white;
-        }
-
-        .music-control:hover {
-            transform: scale(1.1);
-            background: #7e543e;
-        }
-
-        .extra-note {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #8f7a68;
-            border-top: 1px solid #eee3d9;
-            padding-top: 20px;
-            margin-top: 10px;
-        }
-
-        .dress-code {
-            display: inline-block;
-            background: #f6ede6;
-            padding: 6px 16px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            margin-top: 12px;
-        }
-
-        .footer {
-            background: #fcf9f5;
-            text-align: center;
-            padding: 16px;
-            font-size: 0.7rem;
-            color: #bcab9a;
-            border-top: 1px solid #f0e4d8;
-        }
-
-        @media (max-width: 480px) {
-            body { padding: 12px; }
-            .hero h1 { font-size: 2rem; }
-            .event-date { font-size: 1.5rem; }
-            .time-number { font-size: 1.5rem; }
-            .time-box { min-width: 55px; padding: 8px; }
-            .music-control { width: 40px; height: 40px; font-size: 18px; bottom: 15px; right: 15px; }
+        @media (max-width:700px){
+            .hero-content .brand-script{ font-size:3rem; }
+            .hero-content .kicker{ font-size:0.7rem; letter-spacing:4px; }
+            .big-date{ font-size:1.9rem; }
+            .section-title{ font-size:1.6rem; }
+            .section{ padding:44px 18px; }
+            .time-number{ font-size:1.5rem; }
+            .time-box{ min-width:62px; padding:10px; }
+            .gallery-grid{ grid-template-columns:repeat(2,1fr); grid-auto-rows:130px; }
+            .gallery-item.g1{ grid-column:1 / span 2; grid-row:1 / span 2; }
+            .gallery-item.g2{ grid-column:1 / span 2; grid-row:3 / span 2; }
+            .gallery-item.g3{ grid-column:1 / span 1; grid-row:5 / span 1; }
+            .gallery-item.g4{ grid-column:2 / span 1; grid-row:5 / span 1; }
+            .gallery-item.g5{ grid-column:1 / span 2; grid-row:6 / span 2; }
+            .envelope-wrap, .envelope{ width:240px; }
+            .envelope-back:before, .envelope-back:after{ border-left-width:120px; border-right-width:120px; border-bottom-width:82px; }
+            .envelope-flap{ border-left-width:120px; border-right-width:120px; border-top-width:82px; }
         }
     </style>
 </head>
 <body>
-    <div class="invitation-card">
-       <div class="hero">
-    <!-- FOTO DE PORTADA - REEMPLAZA ESTA URL CON TU FOTO -->
-    <img src="./boda1.jpg" 
-         alt="María Fernanda y Alejandro" 
-         class="cover-photo"
-         id="coverPhoto">
-    <div class="hero-content">
-        <h2>Nos casamos</h2>
-        <h1>
-            <span>María Fernanda</span>
-            <span class="ampersand">&</span>
-            <span>Alejandro</span>
-        </h1>
-        <div class="date-badge">⭐  SAVE THE DATE  ⭐</div>
+
+<!-- ===================== ENVELOPE INTRO ===================== -->
+<div class="envelope-screen" id="envelopeScreen">
+    <div class="env-kicker">Tienes una invitación especial</div>
+    <div class="envelope-wrap" id="envelopeWrap">
+        <div class="envelope">
+            <div class="envelope-card">
+                <div class="brand-script">Itzel &amp; Raúl</div>
+                <div class="env-sub">20 · Marzo · 2027</div>
+            </div>
+            <div class="envelope-back"></div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-seal" id="envelopeSeal">I·R</div>
+        </div>
     </div>
+    <div class="envelope-hint">Toca el sello para abrir</div>
+    <button class="envelope-btn" id="envelopeBtn">Abrir invitación</button>
 </div>
 
-        <div class="content">
-            <div class="invitation-text">
-                <p>Con mucha alegría y amor,</p>
-                <p>deseamos compartir con ustedes uno de los días más importantes de nuestras vidas.</p>
-                <div class="quote">“El amor todo lo puede, y nosotros hemos decidido celebrarlo junto a ti.”</div>
-            </div>
+<div id="appRoot"></div>
+<div class="music-control" id="musicToggle">🔇</div>
 
-            <!-- CUENTA REGRESIVA -->
-            <div class="countdown-section">
-                <div class="countdown-title">⏳ ¡Faltan solo...! ⏳</div>
-                <div class="countdown-timer" id="countdown">
-                    <div class="time-box"><div class="time-number" id="days">00</div><div class="time-label">Días</div></div>
-                    <div class="time-box"><div class="time-number" id="hours">00</div><div class="time-label">Horas</div></div>
-                    <div class="time-box"><div class="time-number" id="minutes">00</div><div class="time-label">Minutos</div></div>
-                    <div class="time-box"><div class="time-number" id="seconds">00</div><div class="time-label">Segundos</div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // ============================================================
+    // 1. PARÁMETROS URL Y VALIDACIÓN
+    // ============================================================
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const familiaParam = urlParams.get('familia') || '';
+    const tokenParam = urlParams.get('token') || '';
+
+    // En producción, esto vendría de Google Apps Script
+    const FAMILIAS_AUTORIZADAS = {
+        "Familia Pérez": { cupo: 4, token: "perez2026abc", confirmado: false },
+        "Familia García": { cupo: 2, token: "garcia2026xyz", confirmado: false },
+        "Familia Sánchez": { cupo: 5, token: "sanchez2026def", confirmado: false },
+        "Itzel y Raúl": { cupo: 6, token: "itzelraul2026", confirmado: false },
+        "Familia Martínez": { cupo: 3, token: "martinez2026ghi", confirmado: false }
+    };
+
+    let datosFamilia = null;
+    let errorMotivo = null;
+
+    if (familiaParam && tokenParam) {
+        const familiaEncontrada = FAMILIAS_AUTORIZADAS[familiaParam];
+        if (familiaEncontrada && familiaEncontrada.token === tokenParam) {
+            datosFamilia = {
+                nombre: familiaParam,
+                cupo: familiaEncontrada.cupo,
+                token: tokenParam
+            };
+        } else if (!familiaEncontrada) {
+            errorMotivo = "Familia no autorizada";
+        } else if (familiaEncontrada && familiaEncontrada.token !== tokenParam) {
+            errorMotivo = "Token inválido para esta familia";
+        }
+    } else {
+        // Sin parámetros en la URL: modo vista previa, para poder abrir
+        // la página directamente (sin link personalizado) y revisar avances.
+        const previewNombre = "Itzel y Raúl";
+        datosFamilia = {
+            nombre: previewNombre,
+            cupo: FAMILIAS_AUTORIZADAS[previewNombre].cupo,
+            token: FAMILIAS_AUTORIZADAS[previewNombre].token
+        };
+    }
+
+    // Clave de localStorage para recordar si esta "familia" ya confirmó.
+    const STORAGE_KEY = 'rsvp_confirmado_' + datosFamilia.nombre;
+    const yaConfirmo = localStorage.getItem(STORAGE_KEY) === 'true';
+
+
+    // ============================================================
+    // 2. RENDERIZADO PRINCIPAL
+    // ============================================================
+
+    const app = document.getElementById('appRoot');
+
+    function renderWedding() {
+        const fechaBoda = new Date("March 20, 2027 18:00:00");
+
+        // Error de validación
+        if (errorMotivo || !datosFamilia) {
+            app.innerHTML = `
+                <div class="wedding-container">
+                    <div class="error-card">
+                        <h2>🔒 Acceso no autorizado</h2>
+                        <p>${errorMotivo || "No se pudo validar tu acceso"}</p>
+                        <p style="margin-top:20px;">💕 Por favor, usa el enlace personalizado que recibiste de los novios.</p>
+                    </div>
                 </div>
+            `;
+            const envScreen = document.getElementById('envelopeScreen');
+            if (envScreen) envScreen.style.display = 'none';
+            return;
+        }
+
+        // Mostrar invitación COMPLETA (si confirmó o no, se ve todo)
+        app.innerHTML = `
+            <div class="wedding-container">
+                <!-- HERO -->
+                <div class="hero-cover" style="background-image: url('bodaryi.jpg');">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <div class="kicker">¡Nos Casamos!</div>
+                        <div class="brand-script">Itzel <span class="amp">&amp;</span> Raúl</div>
+                        <div class="hero-date">20 DE MARZO DE 2027</div>
+                        <div class="btn-play" id="playMusicBtn">🎵</div>
+                        <p style="margin-top:12px; font-size:0.85rem; font-family:'Poppins', sans-serif; opacity:0.9;">Presiona play para escuchar nuestra canción</p>
+                    </div>
+                </div>
+
+                <!-- Versículo -->
+                <div class="section">
+                    <div class="verse">
+                        “El amor nunca se da por vencido, jamás pierde la fe, siempre tiene esperanzas y se mantiene firme en toda circunstancia.”
+                    </div>
+                    <p style="font-family:'Poppins', sans-serif; font-size:0.85rem; letter-spacing:1px; color:var(--sage-500);">1 CORINTIOS 13:7</p>
+                </div>
+
+                <!-- Galería -->
+                <div class="section" style="padding-top:0;">
+                    <div class="section-kicker">Nuestra historia</div>
+                    <h3 class="section-title">Un poco de nosotros</h3>
+                    <div class="gallery-grid">
+                        <div class="gallery-item g1"><img src="boda5.jpg" alt="Itzel y Raúl"></div>
+                        <div class="gallery-item g2"><img src="bodaryi.jpg" alt="Itzel y Raúl"></div>
+                        <div class="gallery-item g3"><img src="boda2.jpg" alt="Itzel y Raúl"></div>
+                        <div class="gallery-item g4"><img src="boda4.jpg" alt="Itzel y Raúl"></div>
+                        <div class="gallery-item g5"><img src="boda3.jpg" alt="Itzel y Raúl"></div>
+                    </div>
+                </div>
+
+                <!-- Padres -->
+                <div class="section">
+                    <div class="section-kicker">Con todo su amor</div>
+                    <h3 class="section-title">Con la bendición de nuestros Padres</h3>
+                    <div class="parents-grid">
+                        <div class="card" width="30%">
+                            <h4>Padres de la Novia</h4>
+                            <p>Ma. Guadalupe Sánchez González</p>
+                            <p>Salvador Sánchez Ávila</p>
+                           
+                        </div>
+                        <div class="card" width="30%">
+                            <h4>Padres del Novio</h4>
+                            <p>Reynalda Lozano Castro</p>
+                            <p>Raúl Arteaga Atilano</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Padrinos -->
+                <div class="section">
+                    <h3 class="section-title">En compañía de nuestros Padrinos</h3>
+                    <div class="godparents-grid">
+                        <div class="card">
+                            <h4>Padrinos de velación</h4>
+                            <p>Esteban de Jesús Rodríguez Aldana</p>
+                            <p>Brenda Canales Canales</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fecha -->
+                <div class="section date-grid">
+                    <div class="section-kicker">Guarda la fecha</div>
+                    <div class="big-date">Marzo · Sábado · 2027 · 20</div>
+                    <div class="date-agenda">Agenda fecha</div>
+                    <div class="countdown-timer" id="countdownWidget">
+                        <div class="time-box"><div class="time-number" id="days">00</div><div>Días</div></div>
+                        <div class="time-box"><div class="time-number" id="hours">00</div><div>Horas</div></div>
+                        <div class="time-box"><div class="time-number" id="minutes">00</div><div>Minutos</div></div>
+                        <div class="time-box"><div class="time-number" id="seconds">00</div><div>Segundos</div></div>
+                    </div>
+                </div>
+
+                <!-- Ceremonia y recepción -->
+                <div class="section">
+                    <div class="section-kicker">No te lo pierdas</div>
+                    <h3 class="section-title">Celebraciones</h3>
+                    <div class="events-row">
+                        <div class="event-card">
+                            <h4>🌸 Ceremonia Religiosa</h4>
+                            <p>6:00 pm · Parroquia del Carmen</p>
+                            <p>Colonia el Carmen</p>
+                            <div class="map-placeholder" id="mapCeremonia"></div>
+                        </div>
+                        <div class="event-card">
+                            <h4>🎉 Recepción</h4>
+                            <p>7:00 pm · Salón de fiestas Casa Nueva</p>
+                            <p>Camino a Duarte #132</p>
+                            <div class="map-placeholder" id="mapRecepcion"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dress code y regalos -->
+                <div class="section">
+                    <div class="dress-box">
+                        <h3>✨ Dress Code ✨</h3>
+                        <p><strong>Elegante</strong></p>
+                        <p>Prepárense para una boda llena de colores, dejen el blanco para la novia.</p>
+                    </div>
+                    <div class="gifts-block">
+                        <h3>🎁 Regalos</h3>
+                        <p>El mejor regalo es que estés con nosotros en este día tan esperado, pero si deseas hacernos un obsequio tenemos estas opciones:</p>
+                        <div class="gift-options">
+                            <div class="gift-card">💰 Mesa de dinero</div>
+                            <div class="gift-card">🏡 Apartado para el hogar</div>
+                            <div class="gift-card">📦 Lista de Amazon</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FORMULARIO RSVP (se muestra siempre, pero deshabilitado si ya confirmó) -->
+                <div class="section rsvp-modern">
+                    <h3 class="section-title" style="margin-bottom:20px;">💌 Confirmar Asistencia</h3>
+
+                    ${yaConfirmo ? `
+                        <div class="confirmado-badge">
+                            <span style="font-size:32px;">✅</span>
+                            <p style="margin-top:10px;"><strong>¡Gracias ${escapeHtml(datosFamilia.nombre)}!</strong><br>Tu confirmación ya ha sido registrada.</p>
+                        </div>
+                    ` : ''}
+
+                    <div style="background:var(--white); border:1px solid var(--sage-300); border-radius:24px; padding:15px; margin-bottom:25px; text-align:center; font-family:'Poppins', sans-serif; font-size:0.9rem; color:var(--sage-800);">
+                        <strong>${escapeHtml(datosFamilia.nombre)}</strong> · Cupo máximo: ${datosFamilia.cupo} personas
+                    </div>
+
+                    <form id="rsvpSecureForm">
+                        <div class="form-group">
+                            <label>📝 Tu nombre completo (invitado principal)</label>
+                            <input type="text" id="nombreContacto" ${yaConfirmo ? 'disabled' : 'required'} placeholder="Ej: Itzel Sánchez">
+                        </div>
+                        <div class="form-group">
+                            <label>✅ ¿Asistirán?</label>
+                            <select id="asistenciaSelect" ${yaConfirmo ? 'disabled' : 'required'}>
+                                <option value="">Selecciona...</option>
+                                <option value="SI">🎉 Sí, asistiremos</option>
+                                <option value="NO">💔 No podremos asistir</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>👥 Número de personas (máx ${datosFamilia.cupo})</label>
+                            <input type="number" id="numPersonas" min="0" max="${datosFamilia.cupo}" value="${datosFamilia.cupo}" ${yaConfirmo ? 'disabled' : ''}>
+                        </div>
+                        <div class="form-group">
+                            <label>📋 Nombres de los asistentes</label>
+                            <textarea id="nombresAsistentes" rows="2" placeholder="Ej: Itzel, Raúl, Sofía, etc." ${yaConfirmo ? 'disabled' : ''}></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit" id="submitBtn" ${yaConfirmo ? 'disabled' : ''}>
+                            ${yaConfirmo ? '✅ Confirmación ya registrada' : '📨 Enviar confirmación (única vez)'}
+                        </button>
+                        <div id="formMessageSecure" style="margin-top:15px; text-align:center;"></div>
+                    </form>
+                </div>
+
+                <footer>
+                    <span class="foot-script">Itzel &amp; Raúl</span>
+                    💕 Gracias por ser parte de este día 💕<br>
+                    #BodaItzelRaul2027
+                </footer>
             </div>
+        `;
 
-            <!-- FECHA Y LUGAR -->
-            <div class="details">
-                <div class="event-date">15 · MAYO · 2026</div>
-                <div class="event-day">VIERNES</div>
-                <div class="event-time"><span class="icon">⏰</span> 18:00 horas</div>
-                <div class="event-place"><span class="icon">📍</span> Hacienda Los Encinos</div>
-                <div class="event-place"><span class="icon">🗺️</span> Carretera a Tepoztlán Km 5, Morelos, México</div>
-            </div>
+        iniciarCuentaRegresiva(fechaBoda);
+        iniciarMapas();
+        if (!yaConfirmo) iniciarFormulario();
+        iniciarMusica();
+    }
 
-            <!-- MAPA INTERACTIVO -->
-            <div class="map-container">
-                <div id="weddingMap"></div>
-            </div>
+    // ============================================================
+    // 3. FUNCIONES AUXILIARES
+    // ============================================================
 
-            <!-- GALERÍA DE FOTOS -->
-            <div class="gallery-section">
-                <div class="gallery-title">📸 Nuestros momentos juntos 📸</div>
-                <div class="gallery-grid" id="galleryGrid"></div>
-            </div>
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
 
-            <!-- HORARIO DE EVENTOS -->
-            <div class="schedule">
-                <div class="schedule-item"><strong>🌸 Ceremonia</strong><span>18:00 hrs</span><span style="font-size:0.75rem;">Jardín principal</span></div>
-                <div class="schedule-item"><strong>🥂 Cóctel</strong><span>19:00 hrs</span><span style="font-size:0.75rem;">Terraza</span></div>
-                <div class="schedule-item"><strong>🎉 Recepción</strong><span>20:00 hrs</span><span style="font-size:0.75rem;">Salón de Fiestas</span></div>
-            </div>
+    function iniciarCuentaRegresiva(fechaBoda) {
+        function updateTimer() {
+            const now = new Date().getTime();
+            const diff = fechaBoda - now;
+            if (diff <= 0) {
+                const widget = document.getElementById('countdownWidget');
+                if (widget) widget.innerHTML = '<div style="padding:20px;">🎉 ¡Es hoy! 🎉</div>';
+                return;
+            }
+            const days = Math.floor(diff / (1000*60*60*24));
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            if (document.getElementById('days')) document.getElementById('days').innerText = days;
+            if (document.getElementById('hours')) document.getElementById('hours').innerText = hours;
+            if (document.getElementById('minutes')) document.getElementById('minutes').innerText = mins;
+            if (document.getElementById('seconds')) document.getElementById('seconds').innerText = secs;
+        }
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    }
 
-            <a href="#" class="rsvp-btn" id="rsvpButton">📝 CONFIRMAR ASISTENCIA (RSVP)</a>
+    function iniciarMapas() {
+        setTimeout(() => {
+            if (document.getElementById('mapCeremonia')) {
+                const mapCer = L.map('mapCeremonia').setView([19.4326, -99.1332], 14);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapCer);
+                L.marker([19.4326, -99.1332]).addTo(mapCer).bindPopup('Parroquia del Carmen');
+            }
+            if (document.getElementById('mapRecepcion')) {
+                const mapRec = L.map('mapRecepcion').setView([19.4200, -99.1500], 14);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapRec);
+                L.marker([19.4200, -99.1500]).addTo(mapRec).bindPopup('Salón Casa Nueva');
+            }
+        }, 300);
+    }
 
-            <div class="extra-note">
-                <p>🌟 Confirma tu asistencia antes del <strong>20 de abril, 2026</strong> para ayudarnos con los preparativos.</p>
-                <p>✨ Acompañamiento de niños: sí, contamos con servicio de ludoteca.</p>
-                <div class="dress-code">👗 Código de vestimenta: Formal / Etiqueta casual · Colores tierra y tonos pastel</div>
-                <p style="margin-top: 12px;">💌 ¡Tu presencia es nuestro mejor regalo! Si deseas obsequiarnos algo, sugerimos aportación en sobre.</p>
-            </div>
-        </div>
+    function iniciarFormulario() {
+        const form = document.getElementById('rsvpSecureForm');
+        if (!form) return;
 
-        <div class="footer">
-            💕 Con amor, María Fernanda & Alejandro 💕<br>
-            #BodaFerAle2026
-        </div>
-    </div>
+        const msgDiv = document.getElementById('formMessageSecure');
+        const submitBtn = document.getElementById('submitBtn');
+        const personasInput = document.getElementById('numPersonas');
+        const asisteSelect = document.getElementById('asistenciaSelect');
 
-    <!-- BOTÓN DE CONTROL DE MÚSICA -->
-    <div class="music-control" id="musicToggle">
-        🔇
-    </div>
-
-    <!-- Modal para galería -->
-    <div id="imageModal" class="modal">
-        <span class="modal-close">&times;</span>
-        <img id="modalImage" src="" alt="Foto ampliada">
-    </div>
-
-    <!-- Librerías -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // ========================
-        // 1. MÚSICA DE FONDO (con control de mute)
-        // ========================
-        // Creamos un elemento de audio con una canción romántica (Canon en D - Pachelbel)
-        // Puedes cambiar la URL por cualquier canción que tengas alojada o de un servicio público
-        const audio = new Audio('./titanic.mp3');
-        audio.loop = true;
-        audio.volume = 0.5; // Volumen al 50%
-        
-        let isPlaying = false;
-        const musicToggle = document.getElementById('musicToggle');
-        
-        // Intentar reproducir automáticamente (los navegadores pueden bloquearlo)
-        // Por eso mostramos el botón para que el usuario inicie manualmente
-        function playMusic() {
-            audio.play().then(() => {
-                isPlaying = true;
-                musicToggle.innerHTML = '🔊';
-            }).catch(err => {
-                console.log("Autoplay bloqueado. El usuario debe hacer clic en el botón.");
-                musicToggle.innerHTML = '🔇';
-                isPlaying = false;
+        if (personasInput) {
+            personasInput.addEventListener('change', function() {
+                let valor = parseInt(this.value);
+                const max = parseInt(this.getAttribute('max'));
+                if (valor > max) {
+                    this.value = max;
+                    alert(`No puedes exceder el cupo de ${max} personas.`);
+                }
+                if (valor < 0) this.value = 0;
             });
         }
-        
-        // Toggle play/pause
-        musicToggle.addEventListener('click', () => {
-            if (isPlaying) {
-                audio.pause();
-                isPlaying = false;
-                musicToggle.innerHTML = '🔇';
-            } else {
-                audio.play().then(() => {
-                    isPlaying = true;
-                    musicToggle.innerHTML = '🔊';
-                }).catch(err => {
-                    alert("Haz clic en cualquier lugar de la página para activar la música primero.");
-                });
-            }
-        });
-        
-        // También intentar reproducir al hacer clic en cualquier parte (para superar restricciones de autoplay)
-        document.body.addEventListener('click', function initAudio() {
-            if (!isPlaying) {
-                audio.play().then(() => {
-                    isPlaying = true;
-                    musicToggle.innerHTML = '🔊';
-                }).catch(() => {});
-            }
-            document.body.removeEventListener('click', initAudio);
-        });
-        
-        // ========================
-        // 2. CUENTA REGRESIVA
-        // ========================
-        function updateCountdown() {
-            const weddingDate = new Date("May 15, 2026 18:00:00").getTime();
-            const now = new Date().getTime();
-            const diff = weddingDate - now;
 
-            if (diff <= 0) {
-                document.getElementById('countdown').innerHTML = '<div class="time-box" style="grid-column:1/-1;">🎉 ¡Es hoy! 🎉</div>';
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nombreContacto = document.getElementById('nombreContacto').value.trim();
+            const asiste = asisteSelect.value;
+            let personas = parseInt(personasInput.value);
+            const maxPersonas = parseInt(personasInput.getAttribute('max'));
+            const nombresAsistentes = document.getElementById('nombresAsistentes').value;
+
+            if (!nombreContacto) {
+                msgDiv.innerHTML = '<span style="color:#b33;">❌ Por favor, ingresa tu nombre.</span>';
                 return;
             }
 
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (86400000)) / (3600000));
-            const minutes = Math.floor((diff % 3600000) / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
+            if (!asiste) {
+                msgDiv.innerHTML = '<span style="color:#b33;">❌ Por favor, indica si asistirás.</span>';
+                return;
+            }
 
-            document.getElementById('days').innerText = days < 10 ? '0' + days : days;
-            document.getElementById('hours').innerText = hours < 10 ? '0' + hours : hours;
-            document.getElementById('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
-        }
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
+            if (asiste === 'SI' && (personas <= 0 || personas > maxPersonas)) {
+                msgDiv.innerHTML = `<span style="color:#b33;">❌ Número inválido. Máximo ${maxPersonas} personas.</span>`;
+                return;
+            }
 
-        // ========================
-        // 3. MAPA INTERACTIVO
-        // ========================
-        const map = L.map('weddingMap').setView([18.9857, -99.0954], 15);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> & CartoDB',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(map);
-        L.marker([18.9857, -99.0954]).addTo(map)
-            .bindPopup('<b>Hacienda Los Encinos</b><br>Carretera a Tepoztlán Km 5, Morelos.<br>¡Te esperamos!')
-            .openPopup();
+            if (asiste === 'NO') {
+                personas = 0;
+            }
 
-        // ========================
-        // 4. GALERÍA DE FOTOS
-        // ========================
-        const galleryImages = [
-            "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop",
-            "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&h=400&fit=crop",
-            "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=400&fit=crop",
-            "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=400&fit=crop",
-            "https://images.unsplash.com/photo-1537633552985-df8429e5608b?w=400&h=400&fit=crop",
-            "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400&h=400&fit=crop"
-        ];
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Enviando...';
+            msgDiv.innerHTML = '<span style="color:var(--sage-700);">⏳ Guardando confirmación...</span>';
 
-        const galleryContainer = document.getElementById('galleryGrid');
-        galleryImages.forEach(imgUrl => {
-            const div = document.createElement('div');
-            div.className = 'gallery-item';
-            const img = document.createElement('img');
-            img.src = imgUrl;
-            img.alt = "Foto de la pareja";
-            img.loading = "lazy";
-            div.appendChild(img);
-            div.addEventListener('click', () => {
-                const modal = document.getElementById('imageModal');
-                const modalImg = document.getElementById('modalImage');
-                modal.style.display = 'flex';
-                modalImg.src = imgUrl;
-            });
-            galleryContainer.appendChild(div);
-        });
+            const confirmacion = {
+                familia: datosFamilia.nombre,
+                token: datosFamilia.token,
+                cupo_total: datosFamilia.cupo,
+                nombre_contacto: nombreContacto,
+                asiste: asiste,
+                personas: personas,
+                nombres_asistentes: nombresAsistentes,
+                fecha_confirmacion: new Date().toISOString()
+            };
 
-        // Modal close
-        const modal = document.getElementById('imageModal');
-        const closeBtn = document.querySelector('.modal-close');
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.style.display = 'none';
-        });
+            try {
+             // Enviar a Google Apps Script
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDdwKLvnVy-rjqZRtd-gph_njzZTaZ8adZgU3PNX3oN4SwxaR_sYjz5cdmb68IYsvoKg/exec'; // <-- CAMBIA ESTA URL
 
-        // ========================
-        // 5. RSVP BOTÓN
-        // ========================
-        document.getElementById('rsvpButton').addEventListener('click', function(e) {
-    e.preventDefault();
-    // Abre tu formulario de Google Apps Script en una nueva pestaña
-    window.open('https://script.google.com/macros/s/AKfycbzkFDITxd02Ak69-TytPE2-QytFl-yz8rSUl1pB0KN4jI8pVEFxV7E5H2mkyW0MDxplZQ/exec', '_blank');
+const response = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(confirmacion)
 });
-    </script>
+
+const resultado = await response.json();
+
+if (resultado.success) {
+    localStorage.setItem(STORAGE_KEY, 'true');
+    msgDiv.innerHTML = '<span style="color:#2b6e3c;">✅ ¡Gracias! Tu confirmación se ha guardado correctamente. 💕</span>';
+    submitBtn.textContent = '✅ Confirmado';
+
+    form.querySelectorAll('input, select, textarea, button').forEach(el => el.disabled = true);
+
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+} else {
+    throw new Error(resultado.message);
+}
+            } catch (error) {
+                msgDiv.innerHTML = '<span style="color:#b33;">❌ Error al guardar. Intenta de nuevo.</span>';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📨 Enviar confirmación (única vez)';
+            }
+        });
+    }
+
+    function iniciarMusica() {
+        const audio = new Audio('cepeda.mp3');
+        audio.loop = true;
+        audio.volume = 0.4;
+        let isPlaying = false;
+
+        const toggleBtn = document.getElementById('musicToggle');
+        const playBtn = document.getElementById('playMusicBtn');
+
+        function startMusic() {
+            if (!isPlaying) {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    if (toggleBtn) toggleBtn.innerHTML = '🔊';
+                    if (playBtn) playBtn.innerHTML = '⏸';
+                }).catch(e => console.log("Autoplay bloqueado"));
+            }
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                    toggleBtn.innerHTML = '🔇';
+                    if (playBtn) playBtn.innerHTML = '🎵';
+                } else {
+                    audio.play().then(() => {
+                        isPlaying = true;
+                        toggleBtn.innerHTML = '🔊';
+                        if (playBtn) playBtn.innerHTML = '⏸';
+                    }).catch(() => alert("Haz clic en la página para activar música"));
+                }
+            });
+        }
+
+        if (playBtn) {
+            playBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                    playBtn.innerHTML = '🎵';
+                    if (toggleBtn) toggleBtn.innerHTML = '🔇';
+                } else {
+                    startMusic();
+                }
+            });
+        }
+
+        // Exponer para que el sobre pueda iniciar la música al abrir.
+        window.__startWeddingMusic = startMusic;
+
+        document.body.addEventListener('click', startMusic, { once: true });
+    }
+
+    renderWedding();
+
+    // ============================================================
+    // 4. SOBRE DE APERTURA
+    // ============================================================
+    (function initEnvelope(){
+        const screen = document.getElementById('envelopeScreen');
+        const wrap = document.getElementById('envelopeWrap');
+        const seal = document.getElementById('envelopeSeal');
+        const btn = document.getElementById('envelopeBtn');
+        if (!screen || !wrap) return;
+
+        function openEnvelope() {
+            wrap.classList.add('open');
+            if (typeof window.__startWeddingMusic === 'function') {
+                window.__startWeddingMusic();
+            }
+            setTimeout(() => {
+                screen.classList.add('closing');
+                document.body.style.overflow = '';
+            }, 750);
+        }
+
+        document.body.style.overflow = 'hidden';
+        seal.addEventListener('click', openEnvelope);
+        btn.addEventListener('click', openEnvelope);
+        setTimeout(() => {
+            if (screen.classList.contains('closing')) document.body.style.overflow = '';
+        }, 2000);
+    })();
+</script>
 </body>
 </html>
