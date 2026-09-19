@@ -500,7 +500,7 @@
         <div class="envelope">
             <div class="envelope-card">
                 <div class="brand-script">Itzel &amp; Raúl</div>
-                <div class="env-sub">20 · Marzo · 2027</div>
+                <div class="env-sub">03 · Abril · 2027</div>
             </div>
             <div class="envelope-back"></div>
             <div class="envelope-flap"></div>
@@ -572,7 +572,7 @@
     const app = document.getElementById('appRoot');
 
     function renderWedding() {
-        const fechaBoda = new Date("March 20, 2027 18:00:00");
+        const fechaBoda = new Date("April 03, 2027 13:00:00");
 
         // Error de validación
         if (errorMotivo || !datosFamilia) {
@@ -599,7 +599,7 @@
                     <div class="hero-content">
                         <div class="kicker">¡Nos Casamos!</div>
                         <div class="brand-script">Itzel <span class="amp">&amp;</span> Raúl</div>
-                        <div class="hero-date">20 DE MARZO DE 2027</div>
+                        <div class="hero-date">03 DE ABRIL DE 2027</div>
                         <div class="btn-play" id="playMusicBtn">🎵</div>
                         <p style="margin-top:12px; font-size:0.85rem; font-family:'Poppins', sans-serif; opacity:0.9;">Presiona play para escuchar nuestra canción</p>
                     </div>
@@ -631,13 +631,12 @@
                     <div class="section-kicker">Con todo su amor</div>
                     <h3 class="section-title">Con la bendición de nuestros Padres</h3>
                     <div class="parents-grid">
-                        <div class="card" width="30%">
+                        <div class="card">
                             <h4>Padres de la Novia</h4>
                             <p>Ma. Guadalupe Sánchez González</p>
                             <p>Salvador Sánchez Ávila</p>
-                           
                         </div>
-                        <div class="card" width="30%">
+                        <div class="card">
                             <h4>Padres del Novio</h4>
                             <p>Reynalda Lozano Castro</p>
                             <p>Raúl Arteaga Atilano</p>
@@ -660,7 +659,7 @@
                 <!-- Fecha -->
                 <div class="section date-grid">
                     <div class="section-kicker">Guarda la fecha</div>
-                    <div class="big-date">Marzo · Sábado · 2027 · 20</div>
+                    <div class="big-date">Sábado · Abril · 2027 · 03</div>
                     <div class="date-agenda">Agenda fecha</div>
                     <div class="countdown-timer" id="countdownWidget">
                         <div class="time-box"><div class="time-number" id="days">00</div><div>Días</div></div>
@@ -677,14 +676,14 @@
                     <div class="events-row">
                         <div class="event-card">
                             <h4>🌸 Ceremonia Religiosa</h4>
-                            <p>6:00 pm · Parroquia del Carmen</p>
-                            <p>Colonia el Carmen</p>
+                            <p>13:00 pm · Iglesia de El Sagrado Corazón de Jesús</p>
+                            <p>Calle Jardín Cuauhtémoc 131, 38500 Apaseo El Alto, Guanajuato</p>
                             <div class="map-placeholder" id="mapCeremonia"></div>
                         </div>
                         <div class="event-card">
                             <h4>🎉 Recepción</h4>
-                            <p>7:00 pm · Salón de fiestas Casa Nueva</p>
-                            <p>Camino a Duarte #132</p>
+                            <p>14:30 pm · Palapa Garman</p>
+                            <p>Camino Colorado 202, 38503 Apaseo El Alto, Guanajuato</p>
                             <div class="map-placeholder" id="mapRecepcion"></div>
                         </div>
                     </div>
@@ -800,20 +799,27 @@
         setInterval(updateTimer, 1000);
     }
 
-    function iniciarMapas() {
-        setTimeout(() => {
-            if (document.getElementById('mapCeremonia')) {
-                const mapCer = L.map('mapCeremonia').setView([19.4326, -99.1332], 14);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapCer);
-                L.marker([19.4326, -99.1332]).addTo(mapCer).bindPopup('Parroquia del Carmen');
-            }
-            if (document.getElementById('mapRecepcion')) {
-                const mapRec = L.map('mapRecepcion').setView([19.4200, -99.1500], 14);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(mapRec);
-                L.marker([19.4200, -99.1500]).addTo(mapRec).bindPopup('Salón Casa Nueva');
-            }
-        }, 300);
-    }
+   function iniciarMapas() {
+    setTimeout(() => {
+        // Mapa 1: Ceremonia (Jardín Cuauhtémoc 131)
+        if (document.getElementById('mapCeremonia')) {
+            const mapCer = L.map('mapCeremonia').setView([20.4563, -100.6213], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(mapCer);
+            L.marker([20.4563, -100.6213]).addTo(mapCer).bindPopup('Jardín Cuauhtémoc - Ceremonia');
+        }
+        
+        // Mapa 2: Recepción (Camino Colorado 202)
+        if (document.getElementById('mapRecepcion')) {
+            const mapRec = L.map('mapRecepcion').setView([20.4595, -100.6241], 15);
+           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(mapRec);
+            L.marker([20.4595, -100.6241]).addTo(mapRec).bindPopup('Palapa Garman - Recepción');
+        }
+    }, 300);
+}
 
     function iniciarFormulario() {
         const form = document.getElementById('rsvpSecureForm');
