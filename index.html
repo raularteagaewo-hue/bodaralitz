@@ -122,6 +122,7 @@
             justify-content:center;
             text-align:center;
             padding:10px;
+	    opacity:0;
             transform:translateY(6%);
             transition:transform 0.9s ease 0.15s;
             z-index:1;
@@ -148,7 +149,7 @@
             filter:drop-shadow(0 4px 6px rgba(0,0,0,0.15));
         }
         .envelope-wrap.open .envelope-flap{ transform:rotateX(180deg); }
-        .envelope-wrap.open .envelope-card{ transform:translateY(-18%); }
+        .envelope-wrap.open .envelope-card{ transform:translateY(-18%); opacity:1; }
         .envelope-seal{
             position:absolute;
             top:74px; left:50%;
@@ -214,7 +215,7 @@
         .hero-content{ position:relative; z-index:2; padding:20px; }
         .hero-content .kicker{
             font-family:'Poppins', sans-serif;
-            font-size:0.85rem;
+            font-size:1.5rem;
             font-weight:400;
             letter-spacing:7px;
             margin-bottom:18px;
@@ -659,7 +660,7 @@
                 <!-- Fecha -->
                 <div class="section date-grid">
                     <div class="section-kicker">Guarda la fecha</div>
-                    <div class="big-date">Sábado · Abril · 2027 · 03</div>
+                    <div class="big-date">Sábado · 03 · Abril · 2027 </div>
                     <div class="date-agenda">Agenda fecha</div>
                     <div class="countdown-timer" id="countdownWidget">
                         <div class="time-box"><div class="time-number" id="days">00</div><div>Días</div></div>
@@ -805,18 +806,20 @@
         if (document.getElementById('mapCeremonia')) {
             const mapCer = L.map('mapCeremonia').setView([20.4563, -100.6213], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(mapCer);
+            attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapCer);
             L.marker([20.4563, -100.6213]).addTo(mapCer).bindPopup('Jardín Cuauhtémoc - Ceremonia');
+            mapCer.invalidateSize(); 
         }
         
         // Mapa 2: Recepción (Camino Colorado 202)
         if (document.getElementById('mapRecepcion')) {
             const mapRec = L.map('mapRecepcion').setView([20.4595, -100.6241], 15);
            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(mapRec);
+            attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapRec);
             L.marker([20.4595, -100.6241]).addTo(mapRec).bindPopup('Palapa Garman - Recepción');
+            mapRec.invalidateSize();
         }
     }, 300);
 }
