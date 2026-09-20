@@ -77,6 +77,17 @@ overflow-y:auto;
             color:var(--sage-150);
             text-transform:uppercase;
         }
+        .envelope-screen .env-familia{
+            font-family:'Playfair Display', serif;
+            font-size:1.3rem;
+            font-weight:600;
+            color:var(--cream);
+            margin-bottom:6px;
+            letter-spacing:0.5px;
+        }
+        .envelope-screen .env-familia:empty{
+            display:none;
+        }
         .envelope-wrap{
             perspective:1400px;
             width:280px;
@@ -384,7 +395,7 @@ overflow-y:auto;
             text-align:center;
         }
         .event-card h4{ font-family:'Playfair Display', serif; color:var(--sage-800); margin-bottom:6px; font-size:1.15rem; }
-        .map-placeholder{ height:170px; background:var(--sage-200); border-radius:20px; margin:14px 0 0; overflow:hidden; }
+        .map-placeholder{ position:relative; height:170px; background:var(--sage-200); border-radius:20px; margin:14px 0 0; overflow:hidden; }
         #mapCeremonia, #mapRecepcion{ height:100%; width:100%; }
 
         .dress-box{
@@ -497,6 +508,7 @@ overflow-y:auto;
 
 <!-- ===================== ENVELOPE INTRO ===================== -->
 <div class="envelope-screen" id="envelopeScreen">
+    <div class="env-familia" id="envFamilia"></div>
     <div class="env-kicker">Tienes una invitación especial</div>
     <div class="envelope-wrap" id="envelopeWrap">
         <div class="envelope">
@@ -525,6 +537,12 @@ overflow-y:auto;
     const urlParams = new URLSearchParams(window.location.search);
     const familiaParam = urlParams.get('familia') || '';
     const tokenParam = urlParams.get('token') || '';
+
+    // Muestra el nombre de la familia en el sobre, si viene en el link
+    const envFamiliaEl = document.getElementById('envFamilia');
+    if (envFamiliaEl && familiaParam) {
+        envFamiliaEl.textContent = 'Familia ' + familiaParam;
+    }
 
     // Mismo backend de Google Apps Script sirve la lista de invitados (GET)
     // y guarda las confirmaciones (POST). Ver Code.gs / instrucciones aparte.
@@ -710,7 +728,7 @@ overflow-y:auto;
                 </div>
 
                 <!-- Ceremonia y recepción -->
-                <div class="section">
+                <div class="section" style="margin-top:48px;">
                     <div class="section-kicker">No te lo pierdas</div>
                     <h3 class="section-title">Celebraciones</h3>
                     <div class="events-row">
@@ -846,18 +864,22 @@ overflow-y:auto;
         // Mapa 1: Ceremonia (Jardín Cuauhtémoc 131)
         if (document.getElementById('mapCeremonia')) {
             const mapCer = L.map('mapCeremonia').setView([20.4563, -100.6213], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
             }).addTo(mapCer);
             L.marker([20.4563, -100.6213]).addTo(mapCer).bindPopup('Jardín Cuauhtémoc - Ceremonia');
-            mapCer.invalidateSize(); 
+            mapCer.invalidateSize();
         }
-        
+
         // Mapa 2: Recepción (Camino Colorado 202)
         if (document.getElementById('mapRecepcion')) {
             const mapRec = L.map('mapRecepcion').setView([20.4595, -100.6241], 15);
-           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+           L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
             }).addTo(mapRec);
             L.marker([20.4595, -100.6241]).addTo(mapRec).bindPopup('Palapa Garman - Recepción');
             mapRec.invalidateSize();
