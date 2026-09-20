@@ -526,52 +526,82 @@ overflow-y:auto;
     const familiaParam = urlParams.get('familia') || '';
     const tokenParam = urlParams.get('token') || '';
 
-    // En producción, esto vendría de Google Apps Script
-    const FAMILIAS_AUTORIZADAS = {
-        "Familia Pérez": { cupo: 4, token: "perez2026abc", confirmado: false },
-        "Familia García": { cupo: 2, token: "garcia2026xyz", confirmado: false },
-        "Familia Sánchez": { cupo: 5, token: "sanchez2026def", confirmado: false },
-        "Itzel y Raúl": { cupo: 6, token: "itzelraul2026", confirmado: false },
-        "Familia Martínez": { cupo: 3, token: "martinez2026ghi", confirmado: false }
-    };
+    // Mismo backend de Google Apps Script sirve la lista de invitados (GET)
+    // y guarda las confirmaciones (POST). Ver Code.gs / instrucciones aparte.
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzY5H4idIx7LFZChxdipgnZwjxnisWJ-0WfnHS8ckJO5XayscZ9BjLAvDNt53BJh5eBlg/exec';
 
     let datosFamilia = null;
     let errorMotivo = null;
+    let STORAGE_KEY = '';
+    let yaConfirmo = false;
 
-    if (familiaParam && tokenParam) {
-        const familiaEncontrada = FAMILIAS_AUTORIZADAS[familiaParam];
-        if (familiaEncontrada && familiaEncontrada.token === tokenParam) {
-            datosFamilia = {
-                nombre: familiaParam,
-                cupo: familiaEncontrada.cupo,
-                token: tokenParam
-            };
-        } else if (!familiaEncontrada) {
-            errorMotivo = "Familia no autorizada";
-        } else if (familiaEncontrada && familiaEncontrada.token !== tokenParam) {
-            errorMotivo = "Token inválido para esta familia";
-        }
-    } else {
-        // Sin parámetros en la URL: modo vista previa, para poder abrir
-        // la página directamente (sin link personalizado) y revisar avances.
-        const previewNombre = "Itzel y Raúl";
-        datosFamilia = {
-            nombre: previewNombre,
-            cupo: FAMILIAS_AUTORIZADAS[previewNombre].cupo,
-            token: FAMILIAS_AUTORIZADAS[previewNombre].token
-        };
+    const app = document.getElementById('appRoot');
+    app.innerHTML = `
+        <div class="wedding-container">
+            <div class="error-card">
+                <h2>💌 Cargando tu invitación…</h2>
+            </div>
+        </div>
+    `;
+
+    async function cargarInvitados() {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+        if (!data || !data.invitados) throw new Error('Respuesta inválida de la hoja de invitados');
+        return data.invitados;
     }
 
-    // Clave de localStorage para recordar si esta "familia" ya confirmó.
-    const STORAGE_KEY = 'rsvp_confirmado_' + datosFamilia.nombre;
-    const yaConfirmo = localStorage.getItem(STORAGE_KEY) === 'true';
+    async function iniciar() {
+        let FAMILIAS_AUTORIZADAS = {};
+        try {
+            FAMILIAS_AUTORIZADAS = await cargarInvitados();
+        } catch (e) {
+            errorMotivo = 'No se pudo cargar la lista de invitados. Revisa tu conexión e intenta de nuevo.';
+            renderWedding();
+            return;
+        }
+
+        if (familiaParam && tokenParam) {
+            const familiaEncontrada = FAMILIAS_AUTORIZADAS[familiaParam];
+            if (familiaEncontrada && familiaEncontrada.token === tokenParam) {
+                datosFamilia = {
+                    nombre: familiaParam,
+                    cupo: familiaEncontrada.cupo,
+                    token: tokenParam
+                };
+            } else if (!familiaEncontrada) {
+                errorMotivo = "Familia no autorizada";
+            } else {
+                errorMotivo = "Token inválido para esta familia";
+            }
+        } else {
+            // Sin parámetros en la URL: modo vista previa, para poder abrir
+            // la página directamente (sin link personalizado) y revisar avances.
+            const previewNombre = "Itzel y Raúl";
+            const previewData = FAMILIAS_AUTORIZADAS[previewNombre];
+            if (previewData) {
+                datosFamilia = {
+                    nombre: previewNombre,
+                    cupo: previewData.cupo,
+                    token: previewData.token
+                };
+            } else {
+                errorMotivo = 'Falta la fila "Itzel y Raúl" en la hoja de Invitados (se usa para la vista previa sin link).';
+            }
+        }
+
+        if (datosFamilia) {
+            STORAGE_KEY = 'rsvp_confirmado_' + datosFamilia.nombre;
+            yaConfirmo = localStorage.getItem(STORAGE_KEY) === 'true';
+        }
+
+        renderWedding();
+    }
 
 
     // ============================================================
     // 2. RENDERIZADO PRINCIPAL
     // ============================================================
-
-    const app = document.getElementById('appRoot');
 
     function renderWedding() {
         const fechaBoda = new Date("April 03, 2027 13:00:00");
@@ -636,11 +666,11 @@ overflow-y:auto;
                         <div class="card">
                             <h4>Padres de la Novia</h4>
                             <p>Ma. Guadalupe Sánchez González</p>
-                            <p>Salvador Sánchez Ávila</p>
+                            <p>Salvador Sánchez Ávila ✝️</p>
                         </div>
                         <div class="card">
                             <h4>Padres del Novio</h4>
-                            <p>Reynalda Lozano Castro</p>
+                            <p>Reynalda Lozano Castro ✝️</p>
                             <p>Raúl Arteaga Atilano</p>
                         </div>
                     </div>
@@ -652,10 +682,17 @@ overflow-y:auto;
                     <div class="godparents-grid">
                         <div class="card">
                             <h4>Padrinos de velación</h4>
+                            <p>Raúl Garcia Arenas</p>
+                            <p>Sandra Ivette Arteaga Lozano</p>
+                        </div>
+                                     
+                        <div class="card">
+                            <h4>Padrinos de Anillos</h4>
                             <p>Esteban de Jesús Rodríguez Aldana</p>
                             <p>Brenda Canales Canales</p>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Fecha -->
@@ -678,14 +715,14 @@ overflow-y:auto;
                     <h3 class="section-title">Celebraciones</h3>
                     <div class="events-row">
                         <div class="event-card">
-                            <h4>🌸 Ceremonia Religiosa</h4>
+                            <h4>✝️ Ceremonia Religiosa</h4>
                             <p>13:00 pm </p>
                             <p>Iglesia de El Sagrado Corazón de Jesús</p>
                             <p>Calle Jardín Cuauhtémoc 131, 38500 Apaseo El Alto, Guanajuato</p>
                             <div class="map-placeholder" id="mapCeremonia"></div>
                         </div>
                         <div class="event-card">
-                            <h4>🎉 Recepción</h4>
+                            <h4>🥂 Recepción</h4>
                             <p>14:30 pm</p>
                             <p>Palapa Garman</p>
                             <p>Camino Colorado 202, 38503 Apaseo El Alto, Guanajuato</p>
@@ -893,8 +930,7 @@ overflow-y:auto;
             };
 
             try {
-             // Enviar a Google Apps Script
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDdwKLvnVy-rjqZRtd-gph_njzZTaZ8adZgU3PNX3oN4SwxaR_sYjz5cdmb68IYsvoKg/exec'; // <-- CAMBIA ESTA URL
+             // Enviar a Google Apps Script (misma SCRIPT_URL definida arriba)
 
 const response = await fetch(SCRIPT_URL, {
     method: 'POST',
@@ -980,7 +1016,7 @@ if (resultado.success) {
         document.body.addEventListener('click', startMusic, { once: true });
     }
 
-    renderWedding();
+    iniciar();
 
     // ============================================================
     // 4. SOBRE DE APERTURA
