@@ -528,7 +528,7 @@ overflow-y:auto;
 
     // Mismo backend de Google Apps Script sirve la lista de invitados (GET)
     // y guarda las confirmaciones (POST). Ver Code.gs / instrucciones aparte.
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzY5H4idIx7LFZChxdipgnZwjxnisWJ-0WfnHS8ckJO5XayscZ9BjLAvDNt53BJh5eBlg/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyi-kvEK4F4VAkTzewtLEgUvepkyYfOYMPrqIvBWOTbylhLtLjUumPyqGy5Sl4cf3vbBQ/exec';
 
     let datosFamilia = null;
     let errorMotivo = null;
@@ -934,7 +934,7 @@ overflow-y:auto;
 
 const response = await fetch(SCRIPT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(confirmacion)
 });
 
