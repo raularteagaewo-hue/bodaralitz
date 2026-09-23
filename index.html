@@ -532,7 +532,9 @@ overflow-y:auto;
             .envelope-back:before, .envelope-back:after{ border-left-width:120px; border-right-width:120px; border-bottom-width:82px; }
             .envelope-flap{ height:82px; }
         }
-
+.event-item:not(:first-child) {
+    margin-top: 50px; 
+}
 
     </style>
 </head>
@@ -773,7 +775,8 @@ overflow-y:auto;
                     <h3 class="section-title">Celebraciones</h3>
                     <div class="events-row">
                         <div class="event-card">
-                            <h4>✝️ Ceremonia Religiosa</h4>
+<div class="event-item">
+                            <h2>✝️ Ceremonia Religiosa</h2>
                             <p>13:00 pm </p>
                             <p>Iglesia de El Sagrado Corazón de Jesús</p>
                             <p>Calle Jardín Cuauhtémoc 131, 38500 Apaseo El Alto, Guanajuato</p>
@@ -781,8 +784,9 @@ overflow-y:auto;
                                 <img src="templo.png" alt="Iglesia de El Sagrado Corazón de Jesús" loading="lazy" >
                             </div>
                             <a class="btn-lugar" href="https://maps.app.goo.gl/gzfuJd9h8qMLqqWj7" target="_blank" rel="noopener">📍 Ver ubicación del templo</a>
- 				
-                           <h4>🥂 Recepción</h4>
+ 			 </div>
+<div class="event-item">
+                           <h2>🥂 Recepción</h2>
                             <p>14:30 pm</p>
                             <p>Palapa Garman</p>
                             <p>Camino Colorado 202, 38503 Apaseo El Alto, Guanajuato</p>
@@ -790,6 +794,7 @@ overflow-y:auto;
                                 <img src="palapa.png" alt="Palapa Garman" loading="lazy">
                             </div>
                             <a class="btn-lugar" href="https://maps.app.goo.gl/cm6pVoBaif6eD9yt5" target="_blank" rel="noopener">📍 Ver ubicación de la palapa</a>
+</div>
                         </div>
                     </div>
                 </div>
